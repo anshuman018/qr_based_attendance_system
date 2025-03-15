@@ -236,34 +236,35 @@ const Scanner = () => {
 
   return (
     <div className="max-w-md mx-auto">
-      <h1 className="text-xl font-bold mb-4">Scan Attendee QR Code</h1>
+      <h1 className="text-xl font-bold mb-2">Scan Attendee QR Code</h1>
       
-      <div className="bg-white shadow-md rounded-lg p-4">
-        {/* Camera scanner section */}
+      <div className="bg-white shadow-md rounded-lg p-3">
+        {/* Camera scanner section - REDUCED HEIGHT */}
         {scanning && !uploadedQrData && (
           <>
-            <div id="qr-reader" ref={qrReaderRef} className="w-full h-64 mb-4 relative"></div>
-            <div className="text-center text-sm text-gray-500 mb-2">
+            <div id="qr-reader" ref={qrReaderRef} className="w-full h-48 mb-2 relative"></div>
+            <div className="text-center text-xs text-gray-500 mb-2">
               Scanning for QR code...
             </div>
           </>
         )}
         
-        {/* File upload section - Improved for mobile */}
-        <div className={`mt-3 ${uploadedQrData ? 'border-t pt-3' : ''}`}>
+        {/* File upload section - More prominent on mobile */}
+        <div className={`${uploadedQrData ? 'border-t pt-3' : ''}`}>
           {!uploadedQrData ? (
-            <div className="flex flex-col space-y-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Or upload QR code image:
-              </label>
+            <div className="flex flex-col">
+              <div className="w-full border-t border-gray-200 my-2"></div>
+              <p className="text-sm font-medium text-center mb-2">
+                Can't scan? Try uploading
+              </p>
               
               <label 
                 htmlFor="file-upload" 
-                className="cursor-pointer w-full bg-blue-50 hover:bg-blue-100 
-                  text-blue-700 font-medium py-2 px-4 rounded-md flex items-center justify-center"
+                className="cursor-pointer w-full bg-blue-600 hover:bg-blue-700 
+                  text-white font-medium py-3 px-4 rounded-md flex items-center justify-center"
               >
                 <Upload className="h-4 w-4 mr-2" />
-                Choose Image
+                Upload QR Image
               </label>
               <input
                 id="file-upload"
@@ -308,7 +309,7 @@ const Scanner = () => {
           )}
         </div>
         
-        {/* Security Warning */}
+        {/* Rest of the component remains the same */}
         {securityWarning && (
           <div className="mt-4 p-3 bg-red-50 border border-red-300 rounded-lg">
             <div className="flex items-start">
@@ -367,4 +368,5 @@ const Scanner = () => {
   );
 };
 
+// Fix the export
 export default Scanner;
