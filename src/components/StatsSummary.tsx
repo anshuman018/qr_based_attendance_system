@@ -1,5 +1,5 @@
 import React from 'react';
-import { UserCheck, UserX, CreditCard, Calendar } from 'lucide-react';
+import { UserCheck, CreditCard, Users } from 'lucide-react';
 
 interface StatsSummaryProps {
   totalAttendees: number;
@@ -12,54 +12,31 @@ const StatsSummary = ({ totalAttendees, checkedIn, paidAttendees }: StatsSummary
   const paidPercentage = totalAttendees > 0 ? Math.round((paidAttendees / totalAttendees) * 100) : 0;
   
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div className="grid grid-cols-3 gap-2 mb-4">
       {/* Total Attendees */}
-      <div className="bg-white rounded-lg shadow p-4 flex items-center">
-        <div className="bg-blue-100 p-3 rounded-full mr-4">
-          <Calendar className="h-6 w-6 text-blue-600" />
-        </div>
-        <div>
-          <p className="text-gray-500 text-sm">Total Attendees</p>
-          <p className="text-2xl font-bold">{totalAttendees}</p>
-        </div>
+      <div className="bg-white rounded-lg shadow p-3 flex flex-col items-center justify-center">
+        <Users className="h-5 w-5 text-blue-600 mb-1" />
+        <p className="text-xs text-gray-500">Total</p>
+        <p className="text-lg font-bold">{totalAttendees}</p>
       </div>
       
       {/* Checked In */}
-      <div className="bg-white rounded-lg shadow p-4 flex items-center">
-        <div className="bg-green-100 p-3 rounded-full mr-4">
-          <UserCheck className="h-6 w-6 text-green-600" />
-        </div>
-        <div>
-          <p className="text-gray-500 text-sm">Checked In</p>
-          <div className="flex items-baseline">
-            <p className="text-2xl font-bold">{checkedIn}</p>
-            <p className="ml-2 text-sm text-green-600">{checkInPercentage}%</p>
-          </div>
-        </div>
-      </div>
-      
-      {/* Not Checked In */}
-      <div className="bg-white rounded-lg shadow p-4 flex items-center">
-        <div className="bg-yellow-100 p-3 rounded-full mr-4">
-          <UserX className="h-6 w-6 text-yellow-600" />
-        </div>
-        <div>
-          <p className="text-gray-500 text-sm">Not Checked In</p>
-          <p className="text-2xl font-bold">{totalAttendees - checkedIn}</p>
+      <div className="bg-white rounded-lg shadow p-3 flex flex-col items-center justify-center">
+        <UserCheck className="h-5 w-5 text-green-600 mb-1" />
+        <p className="text-xs text-gray-500">Present</p>
+        <div className="flex flex-col items-center">
+          <p className="text-lg font-bold">{checkedIn}</p>
+          <p className="text-xs text-green-600">{checkInPercentage}%</p>
         </div>
       </div>
       
       {/* Payment Status */}
-      <div className="bg-white rounded-lg shadow p-4 flex items-center">
-        <div className="bg-purple-100 p-3 rounded-full mr-4">
-          <CreditCard className="h-6 w-6 text-purple-600" />
-        </div>
-        <div>
-          <p className="text-gray-500 text-sm">Payment Received</p>
-          <div className="flex items-baseline">
-            <p className="text-2xl font-bold">{paidAttendees}</p>
-            <p className="ml-2 text-sm text-purple-600">{paidPercentage}%</p>
-          </div>
+      <div className="bg-white rounded-lg shadow p-3 flex flex-col items-center justify-center">
+        <CreditCard className="h-5 w-5 text-purple-600 mb-1" />
+        <p className="text-xs text-gray-500">Paid</p>
+        <div className="flex flex-col items-center">
+          <p className="text-lg font-bold">{paidAttendees}</p>
+          <p className="text-xs text-purple-600">{paidPercentage}%</p>
         </div>
       </div>
     </div>

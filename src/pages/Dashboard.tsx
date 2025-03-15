@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { Search, CheckCircle, XCircle, RefreshCcw } from 'lucide-react';
+import { Search, CheckCircle, XCircle, RefreshCcw, Filter } from 'lucide-react';
 import StatsSummary from '../components/StatsSummary';
 
 interface User {
@@ -16,6 +16,8 @@ const Dashboard = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [filter, setFilter] = useState<'all' | 'checked-in' | 'not-checked-in' | 'paid' | 'unpaid'>('all');
 
   useEffect(() => {
     fetchUsers();
@@ -38,117 +40,145 @@ const Dashboard = () => {
     }
   };
 
-  const filteredUsers = users.filter(user =>
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.phone.includes(searchTerm)
-  );
+  const filteredUsers = users.filter(user => {
+    // First apply text search
+    const matchesSearch = 
+      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.phone.includes(searchTerm);
+    
+    // Then apply filters
+    switch(filter) {
+      case 'checked-in':
+        return matchesSearch && user.checked_in;
+      case 'not-checked-in':
+        return matchesSearch && !user.checked_in;
+      case 'paid':
+        return matchesSearch && user.payment_status;
+      case 'unpaid':
+        return matchesSearch && !user.payment_status;
+      default:
+        return matchesSearch;
+    }
+  });
 
   const checkedInCount = users.filter(user => user.checked_in).length;
   const paidCount = users.filter(user => user.payment_status).length;
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">Attendee Dashboard</h1>
-        <div className="flex items-center space-x-2">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-            <input
-              type="text"
-              placeholder="Search by name or phone..."
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          
-          <button 
-            onClick={fetchUsers}
-            className="p-2 bg-gray-100 rounded-md hover:bg-gray-200"
-            title="Refresh data"
-          >
-            <RefreshCcw className="h-5 w-5 text-gray-600" />
-          </button>
-        </div>
-      </div>
+    <div className="space-y-4">
+      <h1 className="text-xl font-bold text-gray-900 mb-4">Attendees</h1>
       
       <StatsSummary 
         totalAttendees={users.length} 
         checkedIn={checkedInCount}
         paidAttendees={paidCount}
       />
+      
+      <div className="flex items-center space-x-2 mb-4">
+        <div className="relative flex-grow">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <input
+            type="text"
+            placeholder="Search..."
+            className="pl-9 pr-4 py-2 w-full border border-gray-300 rounded-md text-sm focus:ring-indigo-500 focus:border-indigo-500"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        
+        <button 
+          onClick={() => setIsFilterOpen(!isFilterOpen)}
+          className="p-2 bg-gray-100 rounded-md hover:bg-gray-200"
+          title="Filter"
+        >
+          <Filter className="h-4 w-4 text-gray-600" />
+        </button>
+        
+        <button 
+          onClick={fetchUsers}
+          className="p-2 bg-gray-100 rounded-md hover:bg-gray-200"
+          title="Refresh"
+        >
+          <RefreshCcw className="h-4 w-4 text-gray-600" />
+        </button>
+      </div>
+      
+      {isFilterOpen && (
+        <div className="mb-4 p-3 bg-white rounded-md shadow-sm border border-gray-100">
+          <p className="text-xs font-medium text-gray-700 mb-2">Filter by:</p>
+          <div className="flex flex-wrap gap-2">
+            <button 
+              className={`text-xs px-2 py-1 rounded-full ${filter === 'all' ? 'bg-indigo-100 text-indigo-800' : 'bg-gray-100 text-gray-800'}`}
+              onClick={() => setFilter('all')}
+            >
+              All
+            </button>
+            <button 
+              className={`text-xs px-2 py-1 rounded-full ${filter === 'checked-in' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}
+              onClick={() => setFilter('checked-in')}
+            >
+              Present
+            </button>
+            <button 
+              className={`text-xs px-2 py-1 rounded-full ${filter === 'not-checked-in' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'}`}
+              onClick={() => setFilter('not-checked-in')}
+            >
+              Absent
+            </button>
+            <button 
+              className={`text-xs px-2 py-1 rounded-full ${filter === 'paid' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'}`}
+              onClick={() => setFilter('paid')}
+            >
+              Paid
+            </button>
+            <button 
+              className={`text-xs px-2 py-1 rounded-full ${filter === 'unpaid' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'}`}
+              onClick={() => setFilter('unpaid')}
+            >
+              Unpaid
+            </button>
+          </div>
+        </div>
+      )}
 
       {loading ? (
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading attendees...</p>
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="mt-2 text-sm text-gray-600">Loading...</p>
         </div>
       ) : (
-        <div className="bg-white shadow-md rounded-lg overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Check-in Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Check-in Time</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredUsers.length > 0 ? (
-                  filteredUsers.map((user) => (
-                    <tr key={user.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">{user.phone}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {user.payment_status ? (
-                          <span className="flex items-center text-green-600">
-                            <CheckCircle className="h-5 w-5 mr-1" />
-                            Paid
-                          </span>
-                        ) : (
-                          <span className="flex items-center text-red-600">
-                            <XCircle className="h-5 w-5 mr-1" />
-                            Pending
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {user.checked_in ? (
-                          <span className="flex items-center text-green-600">
-                            <CheckCircle className="h-5 w-5 mr-1" />
-                            Checked In
-                          </span>
-                        ) : (
-                          <span className="flex items-center text-gray-500">
-                            <XCircle className="h-5 w-5 mr-1" />
-                            Not Checked In
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">
-                          {user.check_in_time ? new Date(user.check_in_time).toLocaleString() : '-'}
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={5} className="px-6 py-4 text-center text-sm text-gray-500">
-                      {searchTerm ? 'No attendees match your search' : 'No attendees found'}
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+        <div className="bg-white shadow-sm rounded-lg overflow-hidden">
+          {filteredUsers.length > 0 ? (
+            <div className="divide-y divide-gray-200">
+              {filteredUsers.map((user) => (
+                <div key={user.id} className="p-3">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="font-medium">{user.name}</p>
+                      <p className="text-sm text-gray-500">{user.phone}</p>
+                    </div>
+                    <div className="flex space-x-2">
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${user.checked_in ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                        {user.checked_in ? 'Present' : 'Absent'}
+                      </span>
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${user.payment_status ? 'bg-purple-100 text-purple-800' : 'bg-red-100 text-red-800'}`}>
+                        {user.payment_status ? 'Paid' : 'Unpaid'}
+                      </span>
+                    </div>
+                  </div>
+                  {user.check_in_time && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Checked in: {new Date(user.check_in_time).toLocaleString()}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="p-4 text-center text-sm text-gray-500">
+              {searchTerm || filter !== 'all' ? 'No matching attendees found' : 'No attendees yet'}
+            </div>
+          )}
         </div>
       )}
     </div>

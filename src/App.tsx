@@ -27,7 +27,7 @@ function App() {
 
   // Simple protected route component
   const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-    if (loading) return <div className="p-8 text-center">Loading...</div>;
+    if (loading) return <div className="p-4 text-center">Loading...</div>;
     if (!session) return <Navigate to="/login" />;
     return <>{children}</>;
   };
@@ -36,7 +36,7 @@ function App() {
     <Router>
       <div className="flex flex-col min-h-screen bg-gray-50">
         {session && <Navbar />}
-        <main className="container mx-auto px-4 py-8 flex-grow">
+        <main className="container mx-auto px-3 py-4 flex-grow max-w-3xl">
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/" element={
@@ -59,7 +59,16 @@ function App() {
           </Routes>
         </main>
         <Footer />
-        <Toaster position="top-right" />
+        <Toaster position="top-center" toastOptions={{
+          duration: 2000,
+          style: {
+            background: '#363636',
+            color: '#fff',
+            fontSize: '14px',
+            maxWidth: '80%',
+            padding: '8px 16px'
+          },
+        }} />
       </div>
     </Router>
   );
