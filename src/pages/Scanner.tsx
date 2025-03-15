@@ -236,77 +236,86 @@ const Scanner = () => {
 
   return (
     <div className="max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Scan Attendee QR Code</h1>
+      <h1 className="text-xl font-bold mb-4">Scan Attendee QR Code</h1>
       
-      <div className="bg-white shadow-md rounded-lg p-6">
+      <div className="bg-white shadow-md rounded-lg p-4">
         {/* Camera scanner section */}
         {scanning && !uploadedQrData && (
           <>
-            <div id="qr-reader" ref={qrReaderRef} className="w-full h-64 mb-4"></div>
-            <div className="text-center text-sm text-gray-500 mb-4">
+            <div id="qr-reader" ref={qrReaderRef} className="w-full h-64 mb-4 relative"></div>
+            <div className="text-center text-sm text-gray-500 mb-2">
               Scanning for QR code...
             </div>
           </>
         )}
         
-        {/* File upload section */}
-        <div className={`mt-4 ${uploadedQrData ? 'border-t pt-4' : ''}`}>
-          <div className="flex items-center justify-between">
-            <label className="block text-sm font-medium text-gray-700">
-              {uploadedQrData ? 'QR code detected!' : 'Or upload QR code image'}
-            </label>
-            
-            {uploadedQrData && (
-              <button
-                onClick={restartCamera}
-                className="text-xs text-indigo-600 hover:text-indigo-800 flex items-center"
+        {/* File upload section - Improved for mobile */}
+        <div className={`mt-3 ${uploadedQrData ? 'border-t pt-3' : ''}`}>
+          {!uploadedQrData ? (
+            <div className="flex flex-col space-y-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Or upload QR code image:
+              </label>
+              
+              <label 
+                htmlFor="file-upload" 
+                className="cursor-pointer w-full bg-blue-50 hover:bg-blue-100 
+                  text-blue-700 font-medium py-2 px-4 rounded-md flex items-center justify-center"
               >
-                <Camera className="h-3 w-3 mr-1" />
-                Back to camera
-              </button>
-            )}
-          </div>
-          
-          <div className="mt-2">
-            {!uploadedQrData ? (
-              <div className="flex items-center">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileUpload}
-                  className="block w-full text-sm text-gray-500
-                    file:mr-4 file:py-2 file:px-4
-                    file:rounded-md file:border-0
-                    file:text-sm file:font-medium
-                    file:bg-blue-50 file:text-blue-700
-                    hover:file:bg-blue-100"
-                />
-              </div>
-            ) : (
+                <Upload className="h-4 w-4 mr-2" />
+                Choose Image
+              </label>
+              <input
+                id="file-upload"
+                type="file"
+                accept="image/*"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+              {selectedFile && (
+                <p className="text-xs text-gray-500 truncate text-center mt-1">
+                  {selectedFile.name}
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-col space-y-3">
               <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-700">QR code detected!</span>
+                <button
+                  onClick={restartCamera}
+                  className="text-xs text-indigo-600 hover:text-indigo-800 flex items-center"
+                >
+                  <Camera className="h-3 w-3 mr-1" />
+                  Back to camera
+                </button>
+              </div>
+              
+              <div className="flex items-center">
                 <span className="text-sm text-gray-500 truncate flex-1">
                   {selectedFile?.name || 'QR code image'}
                 </span>
-                <button
-                  onClick={processUploadedQR}
-                  className="ml-4 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md flex items-center text-sm"
-                >
-                  <Check className="h-4 w-4 mr-2" />
-                  Process QR Code
-                </button>
               </div>
-            )}
-          </div>
+              
+              <button
+                onClick={processUploadedQR}
+                className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md flex items-center justify-center text-sm"
+              >
+                <Check className="h-4 w-4 mr-2" />
+                Process QR Code
+              </button>
+            </div>
+          )}
         </div>
         
         {/* Security Warning */}
         {securityWarning && (
-          <div className="mt-6 p-4 bg-red-50 border border-red-300 rounded-lg">
+          <div className="mt-4 p-3 bg-red-50 border border-red-300 rounded-lg">
             <div className="flex items-start">
-              <AlertTriangle className="h-6 w-6 text-red-600 mr-2 flex-shrink-0" />
+              <AlertTriangle className="h-5 w-5 text-red-600 mr-2 flex-shrink-0" />
               <div>
-                <h3 className="text-lg font-bold text-red-700">Security Alert</h3>
-                <p className="text-red-700 mt-1">
+                <h3 className="text-base font-bold text-red-700">Security Alert</h3>
+                <p className="text-sm text-red-700 mt-1">
                   This QR code has already been used for check-in. 
                   This may be a duplicate or shared QR code.
                 </p>
@@ -317,28 +326,30 @@ const Scanner = () => {
         
         {/* User info section */}
         {userInfo && (
-          <div className={`mt-6 p-4 ${securityWarning ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'} border rounded-lg`}>
-            <h2 className={`text-xl font-semibold ${securityWarning ? 'text-red-800' : 'text-green-800'}`}>
+          <div className={`mt-4 p-3 ${securityWarning ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'} border rounded-lg`}>
+            <h2 className={`text-lg font-semibold ${securityWarning ? 'text-red-800' : 'text-green-800'}`}>
               Attendee Information
               {securityWarning && ' - ALREADY CHECKED IN'}
             </h2>
-            <p className="mt-2"><strong>Name:</strong> {userInfo.name}</p>
-            <p><strong>Phone:</strong> {userInfo.phone}</p>
-            <p>
-              <strong>Payment Status:</strong> 
-              <span className={userInfo.payment_status ? 'text-green-600' : 'text-red-600'}>
-                {userInfo.payment_status ? ' Paid' : ' Pending'}
-              </span>
-            </p>
-            <p className={`font-bold mt-2 ${securityWarning ? 'text-red-600' : 'text-green-600'}`}>
-              {userInfo.checked_in ? 
-                `Checked In at ${new Date(userInfo.check_in_time || '').toLocaleString()}` : 
-                'Not Checked In'}
-            </p>
+            <div className="mt-2 space-y-1 text-sm">
+              <p><strong>Name:</strong> {userInfo.name}</p>
+              <p><strong>Phone:</strong> {userInfo.phone}</p>
+              <p>
+                <strong>Payment Status:</strong> 
+                <span className={userInfo.payment_status ? 'text-green-600' : 'text-red-600'}>
+                  {userInfo.payment_status ? ' Paid' : ' Pending'}
+                </span>
+              </p>
+              <p className={`font-bold mt-2 ${securityWarning ? 'text-red-600' : 'text-green-600'}`}>
+                {userInfo.checked_in ? 
+                  `Checked In at ${new Date(userInfo.check_in_time || '').toLocaleString()}` : 
+                  'Not Checked In'}
+              </p>
+            </div>
             
             <button 
               onClick={restartCamera}
-              className={`mt-4 w-full ${securityWarning ? 'bg-red-600 hover:bg-red-700' : 'bg-indigo-600 hover:bg-indigo-700'} text-white py-2 px-4 rounded-md flex items-center justify-center`}
+              className={`mt-3 w-full ${securityWarning ? 'bg-red-600 hover:bg-red-700' : 'bg-indigo-600 hover:bg-indigo-700'} text-white py-2 px-4 rounded-md flex items-center justify-center text-sm`}
             >
               <ArrowRight className="h-4 w-4 mr-2" />
               {securityWarning ? 'Dismiss Warning' : 'Scan Next Attendee'}
